@@ -9,6 +9,7 @@ export default function App() {
 	const gridApi = useRef(null);
 
 	// Define AG Grid columns
+	// TODO: add column dynamically
 	const columnDefs = [
 		{ headerName: 'ID', field: 'id', sortable: true },
 		{ headerName: 'Task', field: 'item', sortable: true },
@@ -41,8 +42,6 @@ export default function App() {
 
 				payload?.data?.forEach((element) => {
 					if (element.type === 'NEW_DATA') {
-						// Update the grid with new data
-						// setRowData((prevData) => [...prevData, payload]);
 						// Insert the new data at the top of the grid
 						console.log('element', element);
 						insertRowAtTop(element.data);
@@ -75,14 +74,11 @@ export default function App() {
 	const insertRowAtTop = (newRowData) => {
 		if (gridApi.current) {
 			// Use api.applyTransaction to insert a new row at the top
-			console.log('newRowData', newRowData);
 			gridApi.current.applyTransaction({
 				add: [newRowData],
 				addIndex: 0, // Add at index 0 to place at the top
 			});
 		} else {
-			console.log('newRowData in else', newRowData);
-
 			// Update the state if the gridApi is not available yet
 			setRowData((prevData) => [...prevData, newRowData]);
 		}
@@ -112,7 +108,6 @@ export default function App() {
 	};
 
 	const stopHandler = () => {
-		console.log('stopHandler clicked');
 		workerRef.current.terminate();
 	};
 
