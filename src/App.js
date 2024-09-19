@@ -1,6 +1,6 @@
 import './App.css';
-import Dashboard from './Dashboard';
-import LiveDashboard from './LiveDashboard';
+import Dashboard from './screens/Dashboard';
+import LiveDashboard from './screens/LiveDashboard';
 
 function App() {
 	return <LiveDashboard />;
