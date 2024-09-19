@@ -38,29 +38,21 @@ onmessage = (e) => {
 			postMessage({ type: 'WEBSOCKET_OPEN', payload: null });
 		};
 
-		socket.onmessage = (message) => {
-			// Simulate data processing here (you can parse, filter, etc.)
-			const data = JSON.parse(message.data);
-
-			// Send processed data back to the main thread
-			postMessage({ type: 'NEW_DATA', payload: data });
-		};
-
-		// socket.onmessage = handleMessage;
+		socket.onmessage = handleMessage;
 
 		socket.onclose = () => {
 			postMessage({ type: 'WEBSOCKET_CLOSED', payload: null });
 		};
 
-		// setInterval(() => {
-		// 	if (messageBuffer.length > 0) {
-		// 		postMessage({
-		// 			type: 'NEW_DATA_BATCH',
-		// 			payload: { data: messageBuffer },
-		// 		});
-		// 		messageBuffer = [];
-		// 	}
-		// }, BATCH_INTERVAL);
+		setInterval(() => {
+			if (messageBuffer.length > 0) {
+				postMessage({
+					type: 'NEW_DATA_BATCH',
+					payload: { data: messageBuffer },
+				});
+				messageBuffer = [];
+			}
+		}, BATCH_INTERVAL);
 	}
 
 	if (type === 'STOP_WEBSOCKET' && socket) {

@@ -18,10 +18,9 @@ export default function App() {
 
 	// Initialize the Web Worker on component mount
 	useEffect(() => {
-		console.log('useEffect');
 		// Create a Web Worker to handle WebSocket connection
 		workerRef.current = new Worker(
-			new URL('./workers/webSocketWorker.js', import.meta.url)
+			new URL('./workers/webSocketWorkerWithBuffer.js', import.meta.url)
 		);
 
 		// Start the WebSocket connection via the Web Worker
@@ -35,13 +34,21 @@ export default function App() {
 			const { type, payload } = event?.data;
 			console.log('event is', event);
 
-			if (type === 'NEW_DATA') {
-				// Insert the new data at the top of the grid
-				console.log('element', payload);
-				insertRowAtTop(payload.data);
-			} else if (type === 'DELETE') {
-				// delete row from grid
-				deleteRowFromGrid(payload?.data.id);
+			if (type === 'NEW_DATA_BATCH') {
+				// update grip when new batch arrived
+
+				console.log('payload is', payload?.data);
+
+				payload?.data?.forEach((element) => {
+					if (element.type === 'NEW_DATA') {
+						// Insert the new data at the top of the grid
+						console.log('element', element);
+						insertRowAtTop(element.data);
+					} else if (element.type === 'DELETE') {
+						// delete row from grid
+						deleteRowFromGrid(element.data.id);
+					}
+				});
 			}
 
 			if (type === 'WEBSOCKET_OPEN') {
@@ -104,7 +111,7 @@ export default function App() {
 	};
 
 	return (
-		<div className='ag-theme-alpine' style={{ height: 1000, width: '100%' }}>
+		<div className='ag-theme-alpine' style={{ width: '100%' }}>
 			<div>
 				<button onClick={stopHandler}>Stop</button>
 			</div>
@@ -115,7 +122,8 @@ export default function App() {
 				getRowId={(params) => params.data.id} // Ensure AG Grid uses 'id' as the unique row identifier
 				rowBuffer={0} // Prevent rendering of off-screen rows
 				domLayout='autoHeight'
-				asyncTransactionWaitMillis={5000}
+				debounceVerticalScrollbar={true}
+				suppressScrollOnNewData={true}
 			/>
 		</div>
 	);
