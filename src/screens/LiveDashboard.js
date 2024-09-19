@@ -9,7 +9,8 @@ export default function App() {
 	const gridApi = useRef(null);
 
 	// Define AG Grid columns
-	const columnDefs = [
+	// TODO: add column dynamically
+	let columnDefs = [
 		{ headerName: 'ID', field: 'id', sortable: true },
 		{ headerName: 'Task', field: 'item', sortable: true },
 		{ headerName: 'Completed', field: 'timestamp', sortable: true },
@@ -17,10 +18,9 @@ export default function App() {
 
 	// Initialize the Web Worker on component mount
 	useEffect(() => {
-		console.log('useEffect');
 		// Create a Web Worker to handle WebSocket connection
 		workerRef.current = new Worker(
-			new URL('./workers/webSocketWorker.js', import.meta.url)
+			new URL('../workers/webSocketWorkerWithBuffer.js', import.meta.url)
 		);
 
 		// Start the WebSocket connection via the Web Worker
@@ -32,7 +32,7 @@ export default function App() {
 		// Listen for messages from the Web Worker
 		workerRef.current.onmessage = (event) => {
 			const { type, payload } = event?.data;
-			console.log('event is', type);
+			console.log('event is', event);
 
 			if (type === 'NEW_DATA_BATCH') {
 				// update grip when new batch arrived
@@ -41,8 +41,6 @@ export default function App() {
 
 				payload?.data?.forEach((element) => {
 					if (element.type === 'NEW_DATA') {
-						// Update the grid with new data
-						// setRowData((prevData) => [...prevData, payload]);
 						// Insert the new data at the top of the grid
 						console.log('element', element);
 						insertRowAtTop(element.data);
@@ -75,14 +73,11 @@ export default function App() {
 	const insertRowAtTop = (newRowData) => {
 		if (gridApi.current) {
 			// Use api.applyTransaction to insert a new row at the top
-			console.log('newRowData', newRowData);
-			gridApi.current.applyTransaction({
+			gridApi.current.applyTransactionAsync({
 				add: [newRowData],
 				addIndex: 0, // Add at index 0 to place at the top
 			});
 		} else {
-			console.log('newRowData in else', newRowData);
-
 			// Update the state if the gridApi is not available yet
 			setRowData((prevData) => [...prevData, newRowData]);
 		}
@@ -112,12 +107,11 @@ export default function App() {
 	};
 
 	const stopHandler = () => {
-		console.log('stopHandler clicked');
 		workerRef.current.terminate();
 	};
 
 	return (
-		<div className='ag-theme-alpine' style={{ height: 1000, width: '100%' }}>
+		<div className='ag-theme-alpine' style={{ width: '100%' }}>
 			<div>
 				<button onClick={stopHandler}>Stop</button>
 			</div>
@@ -126,10 +120,10 @@ export default function App() {
 				columnDefs={columnDefs} // Define the columns
 				onGridReady={onGridReady}
 				getRowId={(params) => params.data.id} // Ensure AG Grid uses 'id' as the unique row identifier
-				pagination={true}
-				paginationPageSize={10}
 				rowBuffer={0} // Prevent rendering of off-screen rows
-				domLayout='autoHeight' // or 'normal' based on your layout needs
+				domLayout='autoHeight'
+				debounceVerticalScrollbar={true}
+				suppressScrollOnNewData={true}
 			/>
 		</div>
 	);

@@ -1,10 +1,9 @@
 import './App.css';
-import OrdersDashboard from './OrderDashboard';
-import Dashboard from './Dashboard';
-import HighVolumeDashboard from './HighVolumeDashboard';
+import Dashboard from './screens/Dashboard';
+import LiveDashboard from './screens/LiveDashboard';
 
 function App() {
-	return <Dashboard />;
+	return <LiveDashboard />;
 }
 
 export default App;
