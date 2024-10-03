@@ -2,11 +2,18 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { useDispatch, useSelector } from 'react-redux';
+import { addEvent } from '../redux/eventSlice';
 
 export default function App() {
 	const [rowData, setRowData] = useState([]);
 	const workerRef = useRef(null); // Reference for the web worker
 	const gridApi = useRef(null);
+
+	// const dispatch = useDispatch();
+	// const eventList = useSelector((state) => state.events.eventList);
+
+	// console.log('print events', eventList);
 
 	// Define AG Grid columns
 	// TODO: add column dynamically
@@ -38,6 +45,8 @@ export default function App() {
 				// update grip when new batch arrived
 
 				console.log('payload is', payload?.data);
+
+				//dispatch(addEvent(payload?.data));
 
 				payload?.data?.forEach((element) => {
 					if (element.type === 'NEW_DATA') {

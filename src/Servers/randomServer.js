@@ -6,8 +6,20 @@ const wss = new WebSocket.Server({ port: 8080 });
 let dataStore = {};
 let idCounter = 0;
 const sendUpdates = (ws) => {
-	const eventType = Math.random() < 0.5 ? 'NEW_DATA' : 'DELETE';
+	// const eventType = Math.random() < 0.5 ? 'NEW_DATA' : 'DELETE';
 
+	const order = {
+		// id: `${Math.floor(Math.random() * 1000)}`,
+		id: idCounter++,
+		item: `Order ${Math.floor(Math.random() * 100)}`,
+		quantity: Math.floor(Math.random() * 5) + 1,
+		timestamp: new Date().toLocaleTimeString(),
+	};
+
+	dataStore[order.id] = order;
+	ws.send(JSON.stringify({ type: 'NEW_DATA', data: order }));
+
+	/*
 	if (eventType === 'NEW_DATA') {
 		const order = {
 			// id: `${Math.floor(Math.random() * 1000)}`,
@@ -28,11 +40,12 @@ const sendUpdates = (ws) => {
 			ws.send(JSON.stringify({ type: 'DELETE', data: deletedData }));
 		}
 	}
+		*/
 };
 
 wss.on('connection', (ws) => {
 	console.log('New client connected');
-	const intervalId = setInterval(() => sendUpdates(ws), 10);
+	const intervalId = setInterval(() => sendUpdates(ws), 2000);
 
 	ws.on('close', () => {
 		clearInterval(intervalId);
